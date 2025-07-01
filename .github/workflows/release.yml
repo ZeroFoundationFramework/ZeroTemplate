@@ -1,0 +1,68 @@
+# .github/workflows/release.yml
+
+# Name des Workflows, der in der GitHub Actions UI angezeigt wird.
+name: Create Release on Tag
+
+# Definiert, wann dieser Workflow ausgeführt wird.
+on:
+  # Wir lauschen auf 'push'-Events.
+  push:
+    # Der Workflow wird aber NUR ausgeführt, wenn der Push einen Tag betrifft.
+    tags:
+      # Wir filtern die Tags, damit die Action nur bei Versionstags wie
+      # 1.0.0, 1.2.3, 2.0.0-beta etc. ausgelöst wird.
+      - '*'
+
+# Definiert die Aufgaben (Jobs), die im Workflow ausgeführt werden.
+jobs:
+  # Wir haben nur einen Job, den wir 'create_release' nennen.
+  create_release:
+    # Der Job läuft auf einem von GitHub bereitgestellten virtuellen Server mit Ubuntu.
+    runs-on: ubuntu-latest
+
+    # HIER IST DIE KORREKTUR:
+    # Wir müssen der Action explizit die Berechtigung geben, Releases zu erstellen.
+    permissions:
+      contents: write
+
+    # Definiert die einzelnen Schritte, die im Job ausgeführt werden.
+    steps:
+      # Schritt 1: Code auschecken
+      # Dieser Schritt lädt den Code deines Repositories auf den virtuellen Server,
+      # damit die Action darauf zugreifen kann.
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Schritt 2: Release erstellen
+      # Dieser Schritt verwendet eine sehr beliebte, vorgefertigte Action von GitHub,
+      # um einen neuen Release zu erstellen.
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          # Das GITHUB_TOKEN wird automatisch von GitHub bereitgestellt.
+          # Es gibt der Action die Berechtigung, einen Release in deinem Namen zu erstellen.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # Der Name des Tags, der den Release auslöst.
+          # `${{ github.ref_name }}` ist eine dynamische Variable, die den gepushten Tag-Namen enthält.
+          tag_name: ${{ github.ref_name }}
+          
+          # Der Name des Releases, der auf der Releases-Seite angezeigt wird.
+          # Beispiel: "Release v1.0.1"
+          release_name: Release ${{ github.ref_name }}
+          
+          # Der Beschreibungstext für den Release.
+          # Du kannst hier manuell etwas eintragen oder ihn leer lassen,
+          # um ihn später von Hand zu bearbeiten.
+          # Fortgeschrittene Workflows können hier automatisch ein Changelog generieren.
+          body: |
+            Dies ist ein automatischer Release für Version ${{ github.ref_name }}.
+            Weitere Details und ein Changelog können hier hinzugefügt werden.
+          
+          # Setze dies auf 'true', wenn du den Release als Entwurf erstellen möchtest,
+          # den du vor der Veröffentlichung manuell überprüfen kannst.
+          draft: false
+          
+          # Setze dies auf 'true', wenn es sich um eine Vorabversion (z.B. Beta, RC) handelt.
+          prerelease: false
