@@ -29,6 +29,7 @@ public final class TemplateRenderer {
     private func loadTemplate(named filename: String) throws -> String {
         if let cached = cache[filename] { return cached }
         let fileURL = viewsDirectory.appendingPathComponent(filename)
+        print("FileURL: \(fileURL)")
         let content = try String(contentsOf: fileURL)
         cache[filename] = content
         return content
