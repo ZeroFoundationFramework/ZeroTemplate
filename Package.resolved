@@ -1,0 +1,15 @@
+{
+  "originHash" : "1dfabbc1462a1e8e21d05fa11481746794a8c52e5eeb023fba953b6223cafffc",
+  "pins" : [
+    {
+      "identity" : "zeroerrors",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ZeroFoundationFramework/ZeroErrors.git",
+      "state" : {
+        "revision" : "46fdd4e87853ef896fdef7bae94414b71cc477f0",
+        "version" : "1.0.3"
+      }
+    }
+  ],
+  "version" : 3
+}

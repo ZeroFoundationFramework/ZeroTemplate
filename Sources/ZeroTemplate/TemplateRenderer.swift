@@ -1,4 +1,5 @@
 import Foundation
+import ZeroErrors
 
 public typealias TemplateContext = [String: Any]
 
@@ -8,6 +9,7 @@ public final class TemplateRenderer {
 
     public init(viewsDirectory: URL) {
         self.viewsDirectory = viewsDirectory
+        print("View Directory is: \(viewsDirectory)")
     }
 
     public func render(filename: String, context: TemplateContext) throws -> String {
@@ -17,7 +19,7 @@ public final class TemplateRenderer {
         do {
             let templateString = try self.loadTemplate(named: filename)
         }catch{
-            return "<h1>Templating Error</h1><p>Failed to render template: \(filename). File could not be found</p>"
+            return try self.render(template: renderingError, with: TemplateData(["error": ["filename" : "\(filename)"]])!)
         }
         
         return try self.render(template: templateString, with: templateData)
