@@ -12,8 +12,16 @@ public final class TemplateRenderer {
 
     public func render(filename: String, context: TemplateContext) throws -> String {
         guard let templateData = TemplateData(context) else { throw TemplateError.invalidContext }
-        let templateString = try self.loadTemplate(named: filename)
+        
+        let templateString = ""
+        do {
+            let templateString = try self.loadTemplate(named: filename)
+        }catch{
+            return "<h1>Templating Error</h1><p>Failed to render template: \(filename). File could not be found</p>"
+        }
+        
         return try self.render(template: templateString, with: templateData)
+        
     }
 
     private func loadTemplate(named filename: String) throws -> String {
@@ -122,7 +130,5 @@ public final class TemplateRenderer {
         }
         return result
     }
-    
-    public enum TemplateError: Error { case invalidContext }
 }
 
