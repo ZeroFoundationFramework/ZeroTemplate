@@ -4,20 +4,19 @@ import ZeroErrors
 public typealias TemplateContext = [String: Any]
 
 public final class TemplateRenderer {
-    private let viewsDirectory: URL
     private var cache: [String: String] = [:]
 
-    public init(viewsDirectory: URL) {
-        self.viewsDirectory = viewsDirectory
-        print("View Directory is: \(viewsDirectory)")
-    }
+    public init() {}
 
-    public func render(filename: String, context: TemplateContext) throws -> String {
+    //MARK: Render functions
+    public func render(filename: URL, context: TemplateContext) throws -> String {
+    
         guard let templateData = TemplateData(context) else { throw TemplateError.invalidContext }
         
         let templateString = ""
+        
         do {
-            let templateString = try self.loadTemplate(named: filename)
+            let templateString = try self.loadFile(named: filename)
         }catch{
             return try self.render(template: renderingError, with: TemplateData(["error": ["filename" : "\(filename)"]])!)
         }
@@ -26,15 +25,15 @@ public final class TemplateRenderer {
         
     }
 
-    private func loadTemplate(named filename: String) throws -> String {
-        if let cached = cache[filename] { return cached }
-        let fileURL = viewsDirectory.appendingPathComponent(filename)
-        print("FileURL: \(fileURL)")
-        let content = try String(contentsOf: fileURL)
-        cache[filename] = content
+    //MARK: loading functions
+    private func loadFile(named filename: URL) throws -> String {
+        if let cached = cache[filename.absoluteString] {return cached }
+        let content = try String(contentsOf: filename)
+        cache[filename.absoluteString] = content
         return content
     }
 
+    //MARK: Internal rendering
     private func render(template: String, with context: TemplateData) throws -> String {
         var output = template
         // Reihenfolge ist wichtig: Zuerst die spezifischeren Schleifen.
@@ -45,7 +44,7 @@ public final class TemplateRenderer {
         return output
     }
     
-    // Rendert die `#each`-Schleife für Arrays von Objekten
+    //MARK: Render `#each`-Loop
     private func renderEachLoop(in template: String, with context: TemplateData) throws -> String {
         let pattern = "\\{\\{\\#each (.*?)\\}\\}(.*?)\\{\\{\\#end_each\\}\\}"
         let regex = try NSRegularExpression(pattern: pattern, options: .dotMatchesLineSeparators)
@@ -68,7 +67,7 @@ public final class TemplateRenderer {
         return result
     }
     
-    // Rendert die `#for`-Schleife für einfache Arrays UND Zahlenbereiche
+    //MARK: Render `#for`-Loop
     private func renderForLoop(in template: String, with context: TemplateData) throws -> String {
         let pattern = "\\{\\{\\#for (.*?)\\}\\}(.*?)\\{\\{\\#end_for\\}\\}"
         let regex = try NSRegularExpression(pattern: pattern, options: .dotMatchesLineSeparators)
@@ -120,6 +119,7 @@ public final class TemplateRenderer {
         return result
     }
 
+    //MARK: Render variables
     private func renderVariables(in template: String, with context: TemplateData) throws -> String {
         let regex = try NSRegularExpression(pattern: "\\{\\{\\s*(?!#)(.*?)\\s*\\}\\}") // Negative Lookahead `(?!#)` to ignore loop tags
         var result = template

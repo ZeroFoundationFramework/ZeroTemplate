@@ -8,4 +8,5 @@
 public enum TemplateError: Error {
     case invalidContext
     case invalidFile
+    case missingContext
 }
