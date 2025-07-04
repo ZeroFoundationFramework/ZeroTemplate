@@ -13,10 +13,10 @@ public final class TemplateRenderer {
     
         guard let templateData = TemplateData(context) else { throw TemplateError.invalidContext }
         
-        let templateString = ""
+        var templateString = ""
         
         do {
-            let templateString = try self.loadFile(named: filename)
+            templateString = try self.loadFile(named: filename)
         }catch{
             return try self.render(template: renderingError, with: TemplateData(["error": ["filename" : "\(filename)"]])!)
         }
